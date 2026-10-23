@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.lemacdatalab.ui.navigation.AppNavigation
 import com.example.lemacdatalab.ui.theme.LemacDataLabTheme
-
+//no me robes
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

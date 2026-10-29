@@ -2,13 +2,7 @@ package com.example.lemacdatalab.ui.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,30 +37,6 @@ fun EtiquetaChip(
             text = texto,
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-        )
-    }
-}
-
-/** Barra inferior para alternar entre las dos secciones de la app. */
-@Composable
-fun AppBottomBar(
-    rutaActual: String,
-    rutaAutocuidado: String,
-    rutaSolicitudes: String,
-    onSeleccionar: (String) -> Unit
-) {
-    NavigationBar {
-        NavigationBarItem(
-            selected = rutaActual == rutaAutocuidado,
-            onClick = { onSeleccionar(rutaAutocuidado) },
-            icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
-            label = { Text("Autocuidado") }
-        )
-        NavigationBarItem(
-            selected = rutaActual == rutaSolicitudes,
-            onClick = { onSeleccionar(rutaSolicitudes) },
-            icon = { Icon(Icons.Default.Build, contentDescription = null) },
-            label = { Text("Solicitudes") }
         )
     }
 }

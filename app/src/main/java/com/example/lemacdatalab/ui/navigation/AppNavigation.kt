@@ -16,16 +16,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.lemacdatalab.data.repository.PreferencesRegistroRepository
-import com.example.lemacdatalab.data.repository.PreferencesSolicitudRepository
-import com.example.lemacdatalab.ui.components.AppBottomBar
 import com.example.lemacdatalab.ui.screens.DetalleRegistroScreen
-import com.example.lemacdatalab.ui.screens.DetalleSolicitudScreen
 import com.example.lemacdatalab.ui.screens.FormularioRegistroScreen
-import com.example.lemacdatalab.ui.screens.FormularioSolicitudScreen
 import com.example.lemacdatalab.ui.screens.ListaRegistrosScreen
-import com.example.lemacdatalab.ui.screens.ListaSolicitudesScreen
 import com.example.lemacdatalab.ui.viewmodel.RegistroViewModel
-import com.example.lemacdatalab.ui.viewmodel.SolicitudViewModel
 
 object NavDestinations {
     // Sección Autocuidado
@@ -33,13 +27,7 @@ object NavDestinations {
     const val FORMULARIO = "formulario"
     const val DETALLE = "detalle/{registroId}"
 
-    // Sección Solicitudes de laboratorio
-    const val SOLICITUDES = "solicitudes"
-    const val FORMULARIO_SOLICITUD = "solicitudes/formulario"
-    const val DETALLE_SOLICITUD = "solicitudes/detalle/{solicitudId}"
-
     fun createDetalleRoute(registroId: String) = "detalle/$registroId"
-    fun createDetalleSolicitudRoute(solicitudId: String) = "solicitudes/detalle/$solicitudId"
 }
 
 private inline fun viewModelFactoryOf(crossinline build: () -> ViewModel): ViewModelProvider.Factory =
@@ -56,18 +44,6 @@ fun AppNavigation() {
     val registroViewModel: RegistroViewModel = viewModel(
         factory = viewModelFactoryOf { RegistroViewModel(PreferencesRegistroRepository(appContext)) }
     )
-    val solicitudViewModel: SolicitudViewModel = viewModel(
-        factory = viewModelFactoryOf { SolicitudViewModel(PreferencesSolicitudRepository(appContext)) }
-    )
-
-    // Cambio entre las dos secciones principales conservando el estado de cada una
-    val irASeccion: (String) -> Unit = { ruta ->
-        navController.navigate(ruta) {
-            popUpTo(NavDestinations.LISTA) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
 
     NavHost(
         navController = navController,
@@ -82,15 +58,7 @@ fun AppNavigation() {
             ListaRegistrosScreen(
                 viewModel = registroViewModel,
                 onNavigateToFormulario = { navController.navigate(NavDestinations.FORMULARIO) },
-                onNavigateToDetalle = { id -> navController.navigate(NavDestinations.createDetalleRoute(id)) },
-                bottomBar = {
-                    AppBottomBar(
-                        rutaActual = NavDestinations.LISTA,
-                        rutaAutocuidado = NavDestinations.LISTA,
-                        rutaSolicitudes = NavDestinations.SOLICITUDES,
-                        onSeleccionar = irASeccion
-                    )
-                }
+                onNavigateToDetalle = { id -> navController.navigate(NavDestinations.createDetalleRoute(id)) }
             )
         }
 
@@ -114,47 +82,6 @@ fun AppNavigation() {
             DetalleRegistroScreen(
                 registroId = registroId,
                 viewModel = registroViewModel,
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
-        // ----- Solicitudes -----
-        composable(NavDestinations.SOLICITUDES) {
-            ListaSolicitudesScreen(
-                viewModel = solicitudViewModel,
-                onNavigateToFormulario = { navController.navigate(NavDestinations.FORMULARIO_SOLICITUD) },
-                onNavigateToDetalle = { id -> navController.navigate(NavDestinations.createDetalleSolicitudRoute(id)) },
-                bottomBar = {
-                    AppBottomBar(
-                        rutaActual = NavDestinations.SOLICITUDES,
-                        rutaAutocuidado = NavDestinations.LISTA,
-                        rutaSolicitudes = NavDestinations.SOLICITUDES,
-                        onSeleccionar = irASeccion
-                    )
-                }
-            )
-        }
-
-        composable(NavDestinations.FORMULARIO_SOLICITUD) {
-            FormularioSolicitudScreen(
-                viewModel = solicitudViewModel,
-                onNavigateBack = { navController.popBackStack() },
-                onSolicitudCreada = { nuevaId ->
-                    navController.navigate(NavDestinations.createDetalleSolicitudRoute(nuevaId)) {
-                        popUpTo(NavDestinations.FORMULARIO_SOLICITUD) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(
-            route = NavDestinations.DETALLE_SOLICITUD,
-            arguments = listOf(navArgument("solicitudId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val solicitudId = backStackEntry.arguments?.getString("solicitudId") ?: ""
-            DetalleSolicitudScreen(
-                solicitudId = solicitudId,
-                viewModel = solicitudViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

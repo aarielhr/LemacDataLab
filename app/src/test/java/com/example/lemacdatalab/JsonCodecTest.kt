@@ -19,21 +19,11 @@ class JsonCodecTest {
     }
 
     @Test
-    fun `solicitudes hacen ida y vuelta sin perder datos`() {
-        val original = SeedData.solicitudesIniciales
-
-        val recuperado = JsonCodec.solicitudesDesdeJson(JsonCodec.solicitudesAJson(original))
-
-        assertEquals(original, recuperado)
-    }
-
-    @Test
     fun `una lista vacia sigue vacia (no se reemplaza por los datos de ejemplo)`() {
         val json = JsonCodec.registrosAJson(emptyList())
 
         assertEquals("[]", json)
         assertTrue(JsonCodec.registrosDesdeJson(json).isEmpty())
-        assertTrue(JsonCodec.solicitudesDesdeJson(JsonCodec.solicitudesAJson(emptyList())).isEmpty())
     }
 
     @Test

@@ -1,9 +1,8 @@
 # Lemac DataLab
 
-App Android (Kotlin + Jetpack Compose, Material 3) con dos secciones, accesibles desde la barra inferior:
+App Android (Kotlin + Jetpack Compose, Material 3) para autorreporte personal.
 
 - **Autocuidado:** historial de autorreportes por ámbito (Neurodesarrollo, Habilidades DBT, Estado de Ánimo, Adicciones), con filtro, detalle, alta y baja (con confirmación).
-- **Solicitudes:** solicitudes de ensayo de muestras de laboratorio (código, solicitante, tipo de ensayo, cantidad, urgencia).
 
 > Herramienta académica de autorreporte personal. No emite diagnósticos ni reemplaza atención profesional o urgencias.
 
@@ -12,13 +11,13 @@ App Android (Kotlin + Jetpack Compose, Material 3) con dos secciones, accesibles
 ```
 app/src/main/java/com/example/lemacdatalab/
 ├── data/
-│   ├── model/        Modelos (RegistroAutoReporte, Solicitud, Ambitos)
+│   ├── model/        Modelos (RegistroAutoReporte, Ambitos)
 │   ├── local/        JsonCodec (JSON ↔ modelos), LocalPreferencesStorage, SeedData
 │   └── repository/   Interfaces + implementación SharedPreferences + implementación en memoria
 ├── ui/
-│   ├── viewmodel/    RegistroViewModel, SolicitudViewModel y sus UiState
-│   ├── screens/      Lista / Formulario / Detalle de cada sección
-│   ├── components/   Componentes compartidos (EtiquetaChip, barra inferior, formato de fecha)
+│   ├── viewmodel/    RegistroViewModel y su UiState
+│   ├── screens/      Lista / Formulario / Detalle de autocuidado
+│   ├── components/   Componentes compartidos (EtiquetaChip, formato de fecha)
 │   ├── navigation/   NavHost y rutas
 │   └── theme/
 └── MainActivity.kt
@@ -30,7 +29,6 @@ los tests usan la versión en memoria sin necesitar Android.
 ## Reglas de validación
 
 - Autorreporte: el tipo de actividad es obligatorio; en **Habilidades DBT** y **Adicciones** también es obligatorio el desencadenante/estrategia.
-- Solicitud: código, solicitante y tipo de ensayo obligatorios; la cantidad debe ser un entero mayor a 0.
 
 ## Persistencia y privacidad
 

@@ -1,7 +1,6 @@
 package com.example.lemacdatalab.data.local
 
 import com.example.lemacdatalab.data.model.RegistroAutoReporte
-import com.example.lemacdatalab.data.model.Solicitud
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.ParseException
@@ -51,41 +50,6 @@ object JsonCodec {
         }
     }
 
-    fun solicitudesAJson(lista: List<Solicitud>): String {
-        val array = JSONArray()
-        for (item in lista) {
-            array.put(
-                JSONObject().apply {
-                    put("id", item.id)
-                    put("codigoMuestra", item.codigoMuestra)
-                    put("solicitante", item.solicitante)
-                    put("tipoEnsayo", item.tipoEnsayo)
-                    put("cantidadMuestras", item.cantidadMuestras)
-                    put("esUrgente", item.esUrgente)
-                    put("observaciones", item.observaciones)
-                    put("fechaRegistro", item.fechaRegistro)
-                }
-            )
-        }
-        return array.toString()
-    }
-
-    fun solicitudesDesdeJson(json: String): List<Solicitud> {
-        val array = JSONArray(json)
-        return List(array.length()) { i ->
-            val obj = array.getJSONObject(i)
-            Solicitud(
-                id = obj.optString("id", ""),
-                codigoMuestra = obj.optString("codigoMuestra", ""),
-                solicitante = obj.optString("solicitante", ""),
-                tipoEnsayo = obj.optString("tipoEnsayo", ""),
-                cantidadMuestras = obj.optInt("cantidadMuestras", 1),
-                esUrgente = obj.optBoolean("esUrgente", false),
-                observaciones = obj.optString("observaciones", ""),
-                fechaRegistro = leerFecha(obj, "fechaRegistro")
-            )
-        }
-    }
 
     /**
      * Lee la fecha como número. Si viene como texto (formato antiguo "dd/MM/yyyy HH:mm"),

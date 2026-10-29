@@ -2,7 +2,7 @@ package com.example.lemacdatalab.data.local
 
 import com.example.lemacdatalab.data.model.Ambitos
 import com.example.lemacdatalab.data.model.RegistroAutoReporte
-import com.example.lemacdatalab.data.model.Solicitud
+
 import java.util.Calendar
 
 /** Datos de ejemplo que se muestran solo la primera vez que se abre la app. */
@@ -54,29 +54,6 @@ object SeedData {
             desencadenanteEstrategia = "Estrés laboral ➔ Acción protectora: llamar a contacto de apoyo",
             observacionesContexto = "Se evitó el consumo impulsivo exitosamente.",
             fechaHora = fechaMillis(2026, 9, 26, 21, 45)
-        )
-    )
-
-    val solicitudesIniciales = listOf(
-        Solicitud(
-            id = "sol-1",
-            codigoMuestra = "MUESTRA-H-01",
-            solicitante = "Constructora Andes Ltda.",
-            tipoEnsayo = "Hormigón / Cemento",
-            cantidadMuestras = 3,
-            esUrgente = true,
-            observaciones = "Ensayo de compresión a 28 días",
-            fechaRegistro = fechaMillis(2026, 9, 28)
-        ),
-        Solicitud(
-            id = "sol-2",
-            codigoMuestra = "MUESTRA-S-02",
-            solicitante = "Inmobiliaria Bío-Bío",
-            tipoEnsayo = "Suelos / Geotecnia",
-            cantidadMuestras = 5,
-            esUrgente = false,
-            observaciones = "Análisis granulométrico y proctor modificado",
-            fechaRegistro = fechaMillis(2026, 9, 27)
         )
     )
 }

@@ -57,8 +57,7 @@ import com.example.lemacdatalab.ui.viewmodel.RegistroViewModel
 fun ListaRegistrosScreen(
     viewModel: RegistroViewModel,
     onNavigateToFormulario: () -> Unit,
-    onNavigateToDetalle: (String) -> Unit,
-    bottomBar: @Composable () -> Unit = {}
+    onNavigateToDetalle: (String) -> Unit
 ) {
     val registros by viewModel.registros.collectAsState()
     val filtroAmbito by viewModel.filtroAmbito.collectAsState()
@@ -98,7 +97,6 @@ fun ListaRegistrosScreen(
                 )
             )
         },
-        bottomBar = bottomBar,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToFormulario,

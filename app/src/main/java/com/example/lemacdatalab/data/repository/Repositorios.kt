@@ -4,17 +4,13 @@ import android.content.Context
 import com.example.lemacdatalab.data.local.LocalPreferencesStorage
 import com.example.lemacdatalab.data.local.SeedData
 import com.example.lemacdatalab.data.model.RegistroAutoReporte
-import com.example.lemacdatalab.data.model.Solicitud
+
 
 interface RegistroRepository {
     fun cargar(): List<RegistroAutoReporte>
     fun guardar(lista: List<RegistroAutoReporte>)
 }
 
-interface SolicitudRepository {
-    fun cargar(): List<Solicitud>
-    fun guardar(lista: List<Solicitud>)
-}
 
 /** Implementación real: persiste en SharedPreferences. */
 class PreferencesRegistroRepository(context: Context) : RegistroRepository {
@@ -22,13 +18,6 @@ class PreferencesRegistroRepository(context: Context) : RegistroRepository {
     override fun cargar() = LocalPreferencesStorage.cargarRegistros(appContext)
     override fun guardar(lista: List<RegistroAutoReporte>) =
         LocalPreferencesStorage.guardarRegistros(appContext, lista)
-}
-
-class PreferencesSolicitudRepository(context: Context) : SolicitudRepository {
-    private val appContext = context.applicationContext
-    override fun cargar() = LocalPreferencesStorage.cargarSolicitudes(appContext)
-    override fun guardar(lista: List<Solicitud>) =
-        LocalPreferencesStorage.guardarSolicitudes(appContext, lista)
 }
 
 /** Implementación en memoria: para tests y previews (no necesita Android). */
@@ -39,9 +28,3 @@ class InMemoryRegistroRepository(
     override fun guardar(lista: List<RegistroAutoReporte>) { datos = lista }
 }
 
-class InMemorySolicitudRepository(
-    private var datos: List<Solicitud> = SeedData.solicitudesIniciales
-) : SolicitudRepository {
-    override fun cargar() = datos
-    override fun guardar(lista: List<Solicitud>) { datos = lista }
-}

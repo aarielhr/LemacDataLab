@@ -10,6 +10,12 @@ data class RegistroFormUiState(
     val desencadenanteEstrategia: String = "",
     val observacionesContexto: String = "",
 
+    // GPS / Ubicación
+    val latitud: Double? = null,
+    val longitud: Double? = null,
+    val obteniendoUbicacion: Boolean = false,
+    val ubicacionError: String? = null,
+
     // Mensajes de error específicos
     val tipoActividadError: String? = null,
     val desencadenanteError: String? = null,

@@ -11,8 +11,10 @@ lifecycleViewmodelCompose = "2.11.0"
 kotlin = "2.2.10"
 composeBom = "2026.02.01"
 orgJson = "20240303"
+playServicesLocation = "21.4.0"
 
 [libraries]
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

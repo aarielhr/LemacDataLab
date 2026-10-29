@@ -2,8 +2,10 @@ package com.example.lemacdatalab
 
 import com.example.lemacdatalab.data.local.JsonCodec
 import com.example.lemacdatalab.data.local.SeedData
+import com.example.lemacdatalab.data.model.RegistroAutoReporte
 import org.json.JSONException
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -16,6 +18,28 @@ class JsonCodecTest {
         val recuperado = JsonCodec.registrosDesdeJson(JsonCodec.registrosAJson(original))
 
         assertEquals(original, recuperado)
+    }
+
+    @Test
+    fun `registros con latitud y longitud conservan datos de ubicacion GPS`() {
+        val registroConGps = RegistroAutoReporte(
+            id = "gps-1",
+            aliasUsuario = "Usuario_GPS",
+            ambito = "Neurodesarrollo",
+            tipoActividad = "Pausa de autorregulación",
+            nivelIntensidad = 8,
+            desencadenanteEstrategia = "Estrategia",
+            observacionesContexto = "En el parque",
+            fechaHora = 1700000000000L,
+            latitud = -34.9011,
+            longitud = -56.1645
+        )
+
+        val json = JsonCodec.registrosAJson(listOf(registroConGps))
+        val recuperado = JsonCodec.registrosDesdeJson(json).single()
+
+        assertEquals(-34.9011, recuperado.latitud!!, 0.0001)
+        assertEquals(-56.1645, recuperado.longitud!!, 0.0001)
     }
 
     @Test
@@ -35,6 +59,8 @@ class JsonCodecTest {
         val registro = JsonCodec.registrosDesdeJson(json).single()
 
         assertEquals(SeedData.fechaMillis(2026, 9, 28, 10, 30), registro.fechaHora)
+        assertNull(registro.latitud)
+        assertNull(registro.longitud)
     }
 
     @Test(expected = JSONException::class)

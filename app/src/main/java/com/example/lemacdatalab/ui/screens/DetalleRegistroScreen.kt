@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.example.lemacdatalab.ui.components.EtiquetaChip
 import com.example.lemacdatalab.ui.components.formatearFecha
 import com.example.lemacdatalab.ui.viewmodel.RegistroViewModel
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,6 +148,12 @@ fun DetalleRegistroScreen(
                         DetalleRegistroItem(
                             titulo = "Observaciones de Contexto",
                             valor = if (registro.observacionesContexto.isBlank()) "Sin observaciones" else registro.observacionesContexto
+                        )
+                        DetalleRegistroItem(
+                            titulo = "Ubicación GPS",
+                            valor = if (registro.latitud != null && registro.longitud != null)
+                                "📍 Lat: %.5f, Lon: %.5f".format(Locale.US, registro.latitud, registro.longitud)
+                            else "No registrada"
                         )
                         DetalleRegistroItem(titulo = "Usuario de Prueba", valor = registro.aliasUsuario)
                         DetalleRegistroItem(

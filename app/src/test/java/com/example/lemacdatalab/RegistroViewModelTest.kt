@@ -67,16 +67,41 @@ class RegistroViewModelTest {
         viewModel.onTipoActividadChanged("Mente Sabia")
         viewModel.onDesencadenanteChanged("Discusión en el trabajo")
         viewModel.onNivelIntensidadChanged(9f)
+        viewModel.onUbicacionObtenida(-34.9011, -56.1645)
 
         assertTrue(viewModel.validarYGuardar())
 
         val nuevoId = viewModel.formUiState.value.registroCreadoId
         assertNotNull(nuevoId)
         assertEquals(cantidadInicial + 1, viewModel.registros.value.size)
-        assertEquals(nuevoId, viewModel.registros.value.first().id)
-        assertEquals(9, viewModel.registros.value.first().nivelIntensidad)
+        val registroCreado = viewModel.registros.value.first()
+        assertEquals(nuevoId, registroCreado.id)
+        assertEquals(9, registroCreado.nivelIntensidad)
+        assertEquals(-34.9011, registroCreado.latitud!!, 0.0001)
+        assertEquals(-56.1645, registroCreado.longitud!!, 0.0001)
+
         // Un ViewModel nuevo sobre el mismo repositorio ve el registro guardado
         assertNotNull(RegistroViewModel(repository).getRegistroById(nuevoId!!))
+    }
+
+    @Test
+    fun `gestion de estado de ubicacion GPS funciona correctamente`() {
+        viewModel.onObteniendoUbicacionChanged(true)
+        assertTrue(viewModel.formUiState.value.obteniendoUbicacion)
+
+        viewModel.onUbicacionError("Sin señal GPS")
+        assertFalse(viewModel.formUiState.value.obteniendoUbicacion)
+        assertEquals("Sin señal GPS", viewModel.formUiState.value.ubicacionError)
+
+        viewModel.onUbicacionObtenida(-34.90, -56.16)
+        assertFalse(viewModel.formUiState.value.obteniendoUbicacion)
+        assertNull(viewModel.formUiState.value.ubicacionError)
+        assertEquals(-34.90, viewModel.formUiState.value.latitud!!, 0.001)
+        assertEquals(-56.16, viewModel.formUiState.value.longitud!!, 0.001)
+
+        viewModel.onLimpiarUbicacion()
+        assertNull(viewModel.formUiState.value.latitud)
+        assertNull(viewModel.formUiState.value.longitud)
     }
 
     @Test

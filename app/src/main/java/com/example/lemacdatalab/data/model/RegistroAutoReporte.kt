@@ -8,5 +8,7 @@ data class RegistroAutoReporte(
     val nivelIntensidad: Int, // Escala de 1 a 10
     val desencadenanteEstrategia: String,
     val observacionesContexto: String,
-    val fechaHora: Long // Epoch en milisegundos; se formatea solo al mostrar
+    val fechaHora: Long, // Epoch en milisegundos; se formatea solo al mostrar
+    val latitud: Double? = null,
+    val longitud: Double? = null
 )

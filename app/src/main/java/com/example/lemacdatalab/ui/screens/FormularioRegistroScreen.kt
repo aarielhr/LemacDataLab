@@ -1,5 +1,8 @@
 package com.example.lemacdatalab.ui.screens
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -18,8 +21,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -29,6 +37,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -42,11 +51,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.lemacdatalab.data.model.Ambitos
 import com.example.lemacdatalab.ui.viewmodel.RegistroViewModel
+import com.example.lemacdatalab.utils.LocationHelper
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +71,42 @@ fun FormularioRegistroScreen(
 ) {
     val uiState by viewModel.formUiState.collectAsState()
     var dropdownExpanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            viewModel.onObteniendoUbicacionChanged(true)
+            LocationHelper.obtenerUbicacionActual(
+                context = context,
+                onSuccess = { lat, lon -> viewModel.onUbicacionObtenida(lat, lon) },
+                onError = { msg -> viewModel.onUbicacionError(msg) }
+            )
+        } else {
+            viewModel.onUbicacionError("Se requieren permisos de ubicación GPS para obtener las coordenadas.")
+        }
+    }
+
+    val solicitarUbicacion = {
+        viewModel.onObteniendoUbicacionChanged(true)
+        if (LocationHelper.tienePermisosUbicacion(context)) {
+            LocationHelper.obtenerUbicacionActual(
+                context = context,
+                onSuccess = { lat, lon -> viewModel.onUbicacionObtenida(lat, lon) },
+                onError = { msg -> viewModel.onUbicacionError(msg) }
+            )
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
 
     // Navega de inmediato; el mensaje de éxito se muestra en la pantalla de detalle.
     LaunchedEffect(uiState.registroCreadoId) {
@@ -282,6 +331,95 @@ fun FormularioRegistroScreen(
                 maxLines = 5,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Text(
+                text = "6. Ubicación GPS (Opcional)",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (uiState.latitud != null && uiState.longitud != null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = "GPS",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Ubicación obtenida:\nLat: %.5f, Lon: %.5f".format(Locale.US, uiState.latitud, uiState.longitud),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            IconButton(onClick = { viewModel.onLimpiarUbicacion() }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Quitar ubicación"
+                                )
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Captura tu ubicación geográfica al realizar el autorreporte.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (uiState.obteniendoUbicacion) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .padding(start = 8.dp)
+                                        .height(24.dp)
+                                )
+                            } else {
+                                OutlinedButton(
+                                    onClick = solicitarUbicacion,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.LocationOn,
+                                        contentDescription = null,
+                                        modifier = Modifier.padding(end = 4.dp)
+                                    )
+                                    Text("Obtener GPS")
+                                }
+                            }
+                        }
+                    }
+
+                    if (uiState.ubicacionError != null) {
+                        Text(
+                            text = uiState.ubicacionError!!,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 

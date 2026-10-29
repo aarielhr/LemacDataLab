@@ -51,6 +51,45 @@ class RegistroViewModel(
         _formUiState.update { it.copy(observacionesContexto = obs) }
     }
 
+    fun onUbicacionObtenida(lat: Double, lon: Double) {
+        _formUiState.update {
+            it.copy(
+                latitud = lat,
+                longitud = lon,
+                obteniendoUbicacion = false,
+                ubicacionError = null
+            )
+        }
+    }
+
+    fun onUbicacionError(mensaje: String) {
+        _formUiState.update {
+            it.copy(
+                obteniendoUbicacion = false,
+                ubicacionError = mensaje
+            )
+        }
+    }
+
+    fun onObteniendoUbicacionChanged(obteniendo: Boolean) {
+        _formUiState.update {
+            it.copy(
+                obteniendoUbicacion = obteniendo,
+                ubicacionError = if (obteniendo) null else it.ubicacionError
+            )
+        }
+    }
+
+    fun onLimpiarUbicacion() {
+        _formUiState.update {
+            it.copy(
+                latitud = null,
+                longitud = null,
+                ubicacionError = null
+            )
+        }
+    }
+
     fun setFiltroAmbito(filtro: String) {
         _filtroAmbito.value = filtro
     }
@@ -91,7 +130,9 @@ class RegistroViewModel(
             nivelIntensidad = currentState.nivelIntensidad.toInt(),
             desencadenanteEstrategia = currentState.desencadenanteEstrategia.trim(),
             observacionesContexto = currentState.observacionesContexto.trim(),
-            fechaHora = System.currentTimeMillis()
+            fechaHora = System.currentTimeMillis(),
+            latitud = currentState.latitud,
+            longitud = currentState.longitud
         )
 
         val nuevaLista = listOf(nuevoRegistro) + _registros.value

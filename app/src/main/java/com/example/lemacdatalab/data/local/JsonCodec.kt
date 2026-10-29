@@ -27,6 +27,8 @@ object JsonCodec {
                     put("desencadenanteEstrategia", item.desencadenanteEstrategia)
                     put("observacionesContexto", item.observacionesContexto)
                     put("fechaHora", item.fechaHora)
+                    if (item.latitud != null) put("latitud", item.latitud)
+                    if (item.longitud != null) put("longitud", item.longitud)
                 }
             )
         }
@@ -45,11 +47,12 @@ object JsonCodec {
                 nivelIntensidad = obj.optInt("nivelIntensidad", 5),
                 desencadenanteEstrategia = obj.optString("desencadenanteEstrategia", ""),
                 observacionesContexto = obj.optString("observacionesContexto", ""),
-                fechaHora = leerFecha(obj, "fechaHora")
+                fechaHora = leerFecha(obj, "fechaHora"),
+                latitud = if (obj.has("latitud") && !obj.isNull("latitud")) obj.optDouble("latitud") else null,
+                longitud = if (obj.has("longitud") && !obj.isNull("longitud")) obj.optDouble("longitud") else null
             )
         }
     }
-
 
     /**
      * Lee la fecha como número. Si viene como texto (formato antiguo "dd/MM/yyyy HH:mm"),

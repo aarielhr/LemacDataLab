@@ -1,8 +1,6 @@
 # Lemac DataLab
 
-App Android (Kotlin + Jetpack Compose, Material 3) para autorreporte personal.
-
-- **Autocuidado:** historial de autorreportes por ámbito (Neurodesarrollo, Habilidades DBT, Estado de Ánimo, Adicciones), con filtro, detalle, alta, baja (con confirmación) y **captura opcional de ubicación GPS**.
+App Android (Kotlin + Jetpack Compose, Material 3)
 
 > Herramienta académica de autorreporte personal. No emite diagnósticos ni reemplaza atención profesional o urgencias.
 

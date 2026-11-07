@@ -116,7 +116,9 @@ fun FormularioRegistroScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nuevo Registro de Autocuidado") },
+                title = {
+                    Text(if (uiState.esEdicion) "Editar Autorreporte" else "Nuevo Registro de Autocuidado")
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -437,7 +439,10 @@ fun FormularioRegistroScreen(
                     contentDescription = null,
                     modifier = Modifier.padding(end = 8.dp)
                 )
-                Text(text = "Guardar Autorreporte", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = if (uiState.esEdicion) "Guardar Cambios" else "Guardar Autorreporte",
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }

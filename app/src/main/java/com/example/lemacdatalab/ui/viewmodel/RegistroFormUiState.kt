@@ -3,6 +3,7 @@ package com.example.lemacdatalab.ui.viewmodel
 import com.example.lemacdatalab.data.model.Ambitos
 
 data class RegistroFormUiState(
+    val idParaEditar: String? = null,
     val aliasUsuario: String = "Usuario_Prueba_01",
     val ambitoSeleccionado: String = Ambitos.NEURODESARROLLO,
     val tipoActividad: String = "",
@@ -23,4 +24,6 @@ data class RegistroFormUiState(
     // Retroalimentación
     val mensajeExito: String? = null,
     val registroCreadoId: String? = null
-)
+) {
+    val esEdicion: Boolean get() = idParaEditar != null
+}

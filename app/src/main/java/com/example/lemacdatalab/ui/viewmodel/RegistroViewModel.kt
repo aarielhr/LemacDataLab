@@ -24,6 +24,25 @@ class RegistroViewModel(
     private val _registros = MutableStateFlow(repository.cargar())
     val registros: StateFlow<List<RegistroAutoReporte>> = _registros.asStateFlow()
 
+    fun prepararNuevoFormulario(aliasActual: String) {
+        _formUiState.value = RegistroFormUiState(aliasUsuario = aliasActual)
+    }
+
+    fun cargarParaEdicion(registroId: String) {
+        val registro = getRegistroById(registroId) ?: return
+        _formUiState.value = RegistroFormUiState(
+            idParaEditar = registro.id,
+            aliasUsuario = registro.aliasUsuario,
+            ambitoSeleccionado = registro.ambito,
+            tipoActividad = registro.tipoActividad,
+            nivelIntensidad = registro.nivelIntensidad.toFloat(),
+            desencadenanteEstrategia = registro.desencadenanteEstrategia,
+            observacionesContexto = registro.observacionesContexto,
+            latitud = registro.latitud,
+            longitud = registro.longitud
+        )
+    }
+
     fun onAmbitoChanged(nuevoAmbito: String) {
         _formUiState.update {
             it.copy(
@@ -122,28 +141,39 @@ class RegistroViewModel(
             return false
         }
 
-        val nuevoRegistro = RegistroAutoReporte(
-            id = UUID.randomUUID().toString(),
-            aliasUsuario = currentState.aliasUsuario,
+        val registroExistente = if (currentState.idParaEditar != null) getRegistroById(currentState.idParaEditar) else null
+
+        val registroProcesado = RegistroAutoReporte(
+            id = registroExistente?.id ?: UUID.randomUUID().toString(),
+            aliasUsuario = currentState.aliasUsuario.ifBlank { "Usuario_Prueba_01" },
             ambito = currentState.ambitoSeleccionado,
             tipoActividad = currentState.tipoActividad.trim(),
             nivelIntensidad = currentState.nivelIntensidad.toInt(),
             desencadenanteEstrategia = currentState.desencadenanteEstrategia.trim(),
             observacionesContexto = currentState.observacionesContexto.trim(),
-            fechaHora = System.currentTimeMillis(),
+            fechaHora = registroExistente?.fechaHora ?: System.currentTimeMillis(),
             latitud = currentState.latitud,
             longitud = currentState.longitud
         )
 
-        val nuevaLista = listOf(nuevoRegistro) + _registros.value
+        val nuevaLista = if (registroExistente != null) {
+            _registros.value.map { if (it.id == registroExistente.id) registroProcesado else it }
+        } else {
+            listOf(registroProcesado) + _registros.value
+        }
+
         _registros.value = nuevaLista
         repository.guardar(nuevaLista)
 
         _formUiState.update {
             RegistroFormUiState(
+                aliasUsuario = currentState.aliasUsuario,
                 ambitoSeleccionado = currentState.ambitoSeleccionado,
-                mensajeExito = "¡Registro en '${nuevoRegistro.ambito}' guardado exitosamente!",
-                registroCreadoId = nuevoRegistro.id
+                mensajeExito = if (registroExistente != null)
+                    "¡Registro en '${registroProcesado.ambito}' actualizado exitosamente!"
+                else
+                    "¡Registro en '${registroProcesado.ambito}' guardado exitosamente!",
+                registroCreadoId = registroProcesado.id
             )
         }
         return true

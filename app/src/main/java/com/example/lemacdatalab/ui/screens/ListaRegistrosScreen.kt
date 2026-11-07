@@ -21,8 +21,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AlertDialog
@@ -60,7 +62,10 @@ import java.util.Locale
 @Composable
 fun ListaRegistrosScreen(
     viewModel: RegistroViewModel,
+    usuarioSesion: String?,
+    onCerrarSesion: () -> Unit,
     onNavigateToFormulario: () -> Unit,
+    onNavigateToEditar: (String) -> Unit,
     onNavigateToDetalle: (String) -> Unit
 ) {
     val registros by viewModel.registros.collectAsState()
@@ -94,7 +99,26 @@ fun ListaRegistrosScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lemac DataLab - Autocuidado") },
+                title = {
+                    Column {
+                        Text("Lemac DataLab - Autocuidado")
+                        if (!usuarioSesion.isNull_or_blank()) {
+                            Text(
+                                text = "Usuario: $usuarioSesion",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onCerrarSesion) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "Cerrar Sesión"
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -195,6 +219,7 @@ fun ListaRegistrosScreen(
                             RegistroCard(
                                 registro = registro,
                                 onClick = { onNavigateToDetalle(registro.id) },
+                                onEdit = { onNavigateToEditar(registro.id) },
                                 onDelete = { registroAEliminar = registro },
                                 modifier = Modifier.animateItem()
                             )
@@ -210,6 +235,7 @@ fun ListaRegistrosScreen(
 fun RegistroCard(
     registro: RegistroAutoReporte,
     onClick: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -242,6 +268,14 @@ fun RegistroCard(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                     )
+
+                    IconButton(onClick = onEdit) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
 
                     IconButton(onClick = onDelete) {
                         Icon(
@@ -297,3 +331,5 @@ fun RegistroCard(
         }
     }
 }
+
+private fun String?.isNull_or_blank(): Boolean = this == null || this.isBlank()

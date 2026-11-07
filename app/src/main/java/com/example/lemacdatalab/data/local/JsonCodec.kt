@@ -1,6 +1,7 @@
 package com.example.lemacdatalab.data.local
 
 import com.example.lemacdatalab.data.model.RegistroAutoReporte
+import com.example.lemacdatalab.data.model.Usuario
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.ParseException
@@ -50,6 +51,32 @@ object JsonCodec {
                 fechaHora = leerFecha(obj, "fechaHora"),
                 latitud = if (obj.has("latitud") && !obj.isNull("latitud")) obj.optDouble("latitud") else null,
                 longitud = if (obj.has("longitud") && !obj.isNull("longitud")) obj.optDouble("longitud") else null
+            )
+        }
+    }
+
+    fun usuariosAJson(lista: List<Usuario>): String {
+        val array = JSONArray()
+        for (item in lista) {
+            array.put(
+                JSONObject().apply {
+                    put("alias", item.alias)
+                    put("email", item.email)
+                    put("passwordHash", item.passwordHash)
+                }
+            )
+        }
+        return array.toString()
+    }
+
+    fun usuariosDesdeJson(json: String): List<Usuario> {
+        val array = JSONArray(json)
+        return List(array.length()) { i ->
+            val obj = array.getJSONObject(i)
+            Usuario(
+                alias = obj.optString("alias", ""),
+                email = obj.optString("email", ""),
+                passwordHash = obj.optString("passwordHash", "")
             )
         }
     }

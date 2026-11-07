@@ -12,6 +12,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,13 +29,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -45,11 +53,13 @@ import java.util.Locale
 fun DetalleRegistroScreen(
     registroId: String,
     viewModel: RegistroViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToEditar: (String) -> Unit
 ) {
     val registros by viewModel.registros.collectAsState()
     val registro = registros.find { it.id == registroId }
     val snackbarHostState = remember { SnackbarHostState() }
+    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
 
     // Si venimos del formulario, se muestra aquí el mensaje de éxito (una sola vez)
     LaunchedEffect(registroId) {
@@ -58,6 +68,24 @@ fun DetalleRegistroScreen(
             viewModel.limpiarMensajeExito()
             snackbarHostState.showSnackbar(mensaje)
         }
+    }
+
+    if (mostrarDialogoEliminar && registro != null) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoEliminar = false },
+            title = { Text("Eliminar registro") },
+            text = { Text("¿Eliminar \"${registro.tipoActividad}\"? Esta acción no se puede deshacer.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.eliminarRegistro(registro.id)
+                    mostrarDialogoEliminar = false
+                    onNavigateBack()
+                }) { Text("Eliminar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoEliminar = false }) { Text("Cancelar") }
+            }
+        )
     }
 
     Scaffold(
@@ -70,6 +98,23 @@ fun DetalleRegistroScreen(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
                         )
+                    }
+                },
+                actions = {
+                    if (registro != null) {
+                        IconButton(onClick = { onNavigateToEditar(registro.id) }) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar"
+                            )
+                        }
+                        IconButton(onClick = { mostrarDialogoEliminar = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Eliminar",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -155,11 +200,38 @@ fun DetalleRegistroScreen(
                                 "📍 Lat: %.5f, Lon: %.5f".format(Locale.US, registro.latitud, registro.longitud)
                             else "No registrada"
                         )
-                        DetalleRegistroItem(titulo = "Usuario de Prueba", valor = registro.aliasUsuario)
+                        DetalleRegistroItem(titulo = "Usuario", valor = registro.aliasUsuario)
                         DetalleRegistroItem(
                             titulo = "Fecha y Hora de Registro",
                             valor = formatearFecha(registro.fechaHora, conHora = true)
                         )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = { onNavigateToEditar(registro.id) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = null)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Editar")
+                    }
+
+                    Button(
+                        onClick = { mostrarDialogoEliminar = true },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Eliminar")
                     }
                 }
 

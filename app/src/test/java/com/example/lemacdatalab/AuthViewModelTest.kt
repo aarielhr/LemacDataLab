@@ -2,6 +2,7 @@ package com.example.lemacdatalab
 
 import com.example.lemacdatalab.data.repository.InMemoryUserRepository
 import com.example.lemacdatalab.ui.viewmodel.AuthViewModel
+import com.example.lemacdatalab.utils.ConsentimientoInfo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -43,14 +44,32 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `registro con datos validos crea el usuario e inicia sesion`() {
+    fun `registro sin consentimiento aceptado falla`() {
         viewModel.onAliasRegistroChanged("NuevoUsuario")
         viewModel.onEmailRegistroChanged("nuevo@lemac.cl")
         viewModel.onPasswordRegistroChanged("clave123")
+        viewModel.onConsentimientoChanged(false)
+
+        assertFalse(viewModel.ejecutarRegistro())
+        assertNotNull(viewModel.uiState.value.errorAuth)
+    }
+
+    @Test
+    fun `registro con datos validos y consentimiento guarda fecha y version`() {
+        viewModel.onAliasRegistroChanged("NuevoUsuario")
+        viewModel.onEmailRegistroChanged("nuevo@lemac.cl")
+        viewModel.onPasswordRegistroChanged("clave123")
+        viewModel.onConsentimientoChanged(true)
 
         assertTrue(viewModel.ejecutarRegistro())
         assertEquals("NuevoUsuario", viewModel.uiState.value.sesionUsuario)
         assertNull(viewModel.uiState.value.errorAuth)
+
+        val usuarioCreado = viewModel.getUsuarioActual()
+        assertNotNull(usuarioCreado)
+        assertTrue(usuarioCreado!!.consentimientoAceptado)
+        assertEquals(ConsentimientoInfo.VERSION, usuarioCreado.versionConsentimiento)
+        assertTrue(usuarioCreado.fechaConsentimiento > 0)
     }
 
     @Test
@@ -58,8 +77,45 @@ class AuthViewModelTest {
         viewModel.onAliasRegistroChanged("ab") // Muy corto
         viewModel.onEmailRegistroChanged("correo_invalido")
         viewModel.onPasswordRegistroChanged("123")
+        viewModel.onConsentimientoChanged(true)
 
         assertFalse(viewModel.ejecutarRegistro())
+        assertNotNull(viewModel.uiState.value.errorAuth)
+    }
+
+    @Test
+    fun `bloqueo por inactividad activa estado sesionBloqueada`() {
+        viewModel.bloquearSesionPorInactividad()
+
+        assertTrue(viewModel.uiState.value.sesionBloqueada)
+        assertNotNull(viewModel.uiState.value.razonBloqueo)
+    }
+
+    @Test
+    fun `bloqueo por segundo plano activa estado sesionBloqueada`() {
+        viewModel.bloquearSesionPorSegundoPlano()
+
+        assertTrue(viewModel.uiState.value.sesionBloqueada)
+        assertNotNull(viewModel.uiState.value.razonBloqueo)
+    }
+
+    @Test
+    fun `reingreso con contraseña correcta desbloquea la sesion`() {
+        viewModel.bloquearSesionPorSegundoPlano()
+        viewModel.onPasswordReingresoChanged("1234")
+
+        assertTrue(viewModel.reingresarConPassword())
+        assertFalse(viewModel.uiState.value.sesionBloqueada)
+        assertNull(viewModel.uiState.value.razonBloqueo)
+    }
+
+    @Test
+    fun `reingreso con contraseña incorrecta muestra error`() {
+        viewModel.bloquearSesionPorInactividad()
+        viewModel.onPasswordReingresoChanged("clave_erronea")
+
+        assertFalse(viewModel.reingresarConPassword())
+        assertTrue(viewModel.uiState.value.sesionBloqueada)
         assertNotNull(viewModel.uiState.value.errorAuth)
     }
 

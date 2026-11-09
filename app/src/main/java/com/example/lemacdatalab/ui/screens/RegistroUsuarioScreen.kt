@@ -3,6 +3,7 @@ package com.example.lemacdatalab.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,9 +17,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.lemacdatalab.ui.viewmodel.AuthViewModel
+import com.example.lemacdatalab.utils.ConsentimientoInfo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +52,34 @@ fun RegistroUsuarioScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by authViewModel.uiState.collectAsState()
+
+    if (uiState.mostrarDialogoConsentimiento) {
+        AlertDialog(
+            onDismissRequest = { authViewModel.onMostrarDialogoConsentimiento(false) },
+            title = { Text("Consentimiento Informado") },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text(
+                        text = ConsentimientoInfo.TEXTO_COMPLETO,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    authViewModel.onConsentimientoChanged(true)
+                    authViewModel.onMostrarDialogoConsentimiento(false)
+                }) {
+                    Text("Aceptar Consentimiento")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { authViewModel.onMostrarDialogoConsentimiento(false) }) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -137,6 +169,33 @@ fun RegistroUsuarioScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    // Aceptación obligatoria del Consentimiento Informado
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = uiState.consentimientoAceptado,
+                            onCheckedChange = { authViewModel.onConsentimientoChanged(it) }
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Acepto el Consentimiento Informado (*)",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            TextButton(
+                                onClick = { authViewModel.onMostrarDialogoConsentimiento(true) },
+                                modifier = Modifier.padding(top = 0.dp)
+                            ) {
+                                Text(
+                                    text = "Leer texto del consentimiento (${ConsentimientoInfo.VERSION})",
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                        }
+                    }
+
                     AnimatedVisibility(visible = uiState.errorAuth != null) {
                         uiState.errorAuth?.let {
                             Text(
@@ -153,6 +212,7 @@ fun RegistroUsuarioScreen(
                                 onRegistroExitoso()
                             }
                         },
+                        enabled = uiState.consentimientoAceptado,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)

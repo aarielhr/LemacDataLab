@@ -12,8 +12,10 @@ kotlin = "2.2.10"
 composeBom = "2026.02.01"
 orgJson = "20240303"
 playServicesLocation = "21.4.0"
+securityCrypto = "1.1.0"
 
 [libraries]
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

@@ -27,6 +27,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -63,6 +65,8 @@ import java.util.Locale
 fun ListaRegistrosScreen(
     viewModel: RegistroViewModel,
     usuarioSesion: String?,
+    onNavigateToMisDatos: () -> Unit,
+    onNavigateToNotificaciones: () -> Unit,
     onCerrarSesion: () -> Unit,
     onNavigateToFormulario: () -> Unit,
     onNavigateToEditar: (String) -> Unit,
@@ -112,6 +116,18 @@ fun ListaRegistrosScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onNavigateToNotificaciones) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Notificaciones"
+                        )
+                    }
+                    IconButton(onClick = onNavigateToMisDatos) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Mis Datos"
+                        )
+                    }
                     IconButton(onClick = onCerrarSesion) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,

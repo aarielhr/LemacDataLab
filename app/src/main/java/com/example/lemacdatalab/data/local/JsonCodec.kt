@@ -63,6 +63,9 @@ object JsonCodec {
                     put("alias", item.alias)
                     put("email", item.email)
                     put("passwordHash", item.passwordHash)
+                    put("consentimientoAceptado", item.consentimientoAceptado)
+                    put("fechaConsentimiento", item.fechaConsentimiento)
+                    put("versionConsentimiento", item.versionConsentimiento)
                 }
             )
         }
@@ -76,7 +79,10 @@ object JsonCodec {
             Usuario(
                 alias = obj.optString("alias", ""),
                 email = obj.optString("email", ""),
-                passwordHash = obj.optString("passwordHash", "")
+                passwordHash = obj.optString("passwordHash", ""),
+                consentimientoAceptado = obj.optBoolean("consentimientoAceptado", true),
+                fechaConsentimiento = obj.optLong("fechaConsentimiento", System.currentTimeMillis()),
+                versionConsentimiento = obj.optString("versionConsentimiento", "v1.0 - 2026")
             )
         }
     }

@@ -37,6 +37,7 @@ import com.example.lemacdatalab.ui.screens.MisDatosScreen
 import com.example.lemacdatalab.ui.screens.ReingresoScreen
 import com.example.lemacdatalab.ui.screens.RegistroUsuarioScreen
 import com.example.lemacdatalab.ui.viewmodel.AuthViewModel
+import com.example.lemacdatalab.ui.viewmodel.ActividadesViewModel
 import com.example.lemacdatalab.ui.viewmodel.NotificationViewModel
 import com.example.lemacdatalab.ui.viewmodel.RegistroViewModel
 import kotlinx.coroutines.delay
@@ -75,6 +76,9 @@ fun AppNavigation() {
     )
     val registroViewModel: RegistroViewModel = viewModel(
         factory = viewModelFactoryOf { RegistroViewModel(PreferencesRegistroRepository(appContext)) }
+    )
+    val actividadesViewModel: ActividadesViewModel = viewModel(
+        factory = viewModelFactoryOf { ActividadesViewModel() }
     )
     val notificationViewModel: NotificationViewModel = viewModel()
 
@@ -237,6 +241,7 @@ fun AppNavigation() {
             composable(NavDestinations.FORMULARIO) {
                 FormularioRegistroScreen(
                     viewModel = registroViewModel,
+                    actividadesViewModel = actividadesViewModel,
                     onNavigateBack = { navController.popBackStack() },
                     onRegistroCreado = { nuevaId ->
                         navController.navigate(NavDestinations.createDetalleRoute(nuevaId)) {
@@ -258,6 +263,7 @@ fun AppNavigation() {
                 }
                 FormularioRegistroScreen(
                     viewModel = registroViewModel,
+                    actividadesViewModel = actividadesViewModel,
                     onNavigateBack = { navController.popBackStack() },
                     onRegistroCreado = { id ->
                         navController.navigate(NavDestinations.createDetalleRoute(id)) {

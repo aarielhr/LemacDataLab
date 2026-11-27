@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -42,6 +43,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -57,6 +59,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.lemacdatalab.data.model.Ambitos
+import com.example.lemacdatalab.ui.viewmodel.ActividadesUiState
+import com.example.lemacdatalab.ui.viewmodel.ActividadesViewModel
 import com.example.lemacdatalab.ui.viewmodel.RegistroViewModel
 import com.example.lemacdatalab.utils.LocationHelper
 import java.util.Locale
@@ -66,12 +70,18 @@ import kotlin.math.roundToInt
 @Composable
 fun FormularioRegistroScreen(
     viewModel: RegistroViewModel,
+    actividadesViewModel: ActividadesViewModel,
     onNavigateBack: () -> Unit,
     onRegistroCreado: (String) -> Unit
 ) {
     val uiState by viewModel.formUiState.collectAsState()
+    val actividadesUiState by actividadesViewModel.uiState.collectAsState()
     var dropdownExpanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    LaunchedEffect(actividadesViewModel) {
+        actividadesViewModel.cargarActividades()
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -207,19 +217,61 @@ fun FormularioRegistroScreen(
                             .fillMaxWidth()
                     )
 
-                    val sugerencias = Ambitos.getActividadesSugeridas(uiState.ambitoSeleccionado)
                     ExposedDropdownMenu(
                         expanded = dropdownExpanded,
                         onDismissRequest = { dropdownExpanded = false }
                     ) {
-                        sugerencias.forEach { opcion ->
-                            DropdownMenuItem(
-                                text = { Text(opcion) },
-                                onClick = {
-                                    viewModel.onTipoActividadChanged(opcion)
-                                    dropdownExpanded = false
+                        when (val state = actividadesUiState) {
+                            ActividadesUiState.Cargando -> {
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            CircularProgressIndicator(modifier = Modifier.size(18.dp))
+                                            Text(" Cargando actividades...")
+                                        }
+                                    },
+                                    onClick = {},
+                                    enabled = false
+                                )
+                            }
+                            is ActividadesUiState.Datos -> {
+                                val actividades = state.actividades.filter { it.nombre.isNotBlank() }
+                                if (actividades.isEmpty()) {
+                                    DropdownMenuItem(
+                                        text = { Text("No hay actividades disponibles") },
+                                        onClick = {},
+                                        enabled = false
+                                    )
                                 }
-                            )
+                                actividades.forEach { actividad ->
+                                    DropdownMenuItem(
+                                        text = { Text(actividad.nombre) },
+                                        onClick = {
+                                            viewModel.onTipoActividadChanged(actividad.nombre)
+                                            dropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                            is ActividadesUiState.Error -> {
+                                Text(
+                                    text = "Error: ${state.mensaje}",
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                                TextButton(onClick = { actividadesViewModel.cargarActividades() }) {
+                                    Text("Reintentar")
+                                }
+                                Ambitos.getActividadesSugeridas(uiState.ambitoSeleccionado).forEach { opcion ->
+                                    DropdownMenuItem(
+                                        text = { Text(opcion) },
+                                        onClick = {
+                                            viewModel.onTipoActividadChanged(opcion)
+                                            dropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }

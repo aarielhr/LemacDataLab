@@ -9,9 +9,10 @@ App Android (Kotlin + Jetpack Compose, Material 3)
 ```
 app/src/main/java/com/example/lemacdatalab/
 ├── data/
-│   ├── model/        Modelos (RegistroAutoReporte, Ambitos)
+│   ├── model/        Modelos (RegistroAutoReporte, Actividad, Ambitos)
 │   ├── local/        JsonCodec (JSON ↔ modelos), LocalPreferencesStorage, SeedData
-│   └── repository/   Interfaces + implementación SharedPreferences + implementación en memoria
+│   ├── remote/       API Retrofit para GET /actividades
+│   └── repository/   Repositorios local/en memoria y remoto
 ├── utils/            LocationHelper (Play Services FusedLocationProviderClient)
 ├── ui/
 │   ├── viewmodel/    RegistroViewModel y su UiState
@@ -44,3 +45,8 @@ Abrir la carpeta en Android Studio y ejecutar la configuración `app`, o:
 ./gradlew assembleDebug
 ./gradlew testDebugUnitTest
 ```
+
+La API devuelve un arreglo JSON de actividades con el campo `nombre`, por ejemplo
+`[{"nombre":"Pausa de autorregulación"}]`. La URL base predeterminada apunta al
+puerto 8080 del equipo anfitrión desde el emulador Android (`10.0.2.2`); puede
+sobrescribirse con `-PAPI_BASE_URL=https://servidor/`.
